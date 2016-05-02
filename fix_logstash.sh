@@ -3,11 +3,11 @@
 #usage info
 show_help() {
 cat << EOF
-Usage: ${0##*/} [-h] [-l LOCAL_DIR] [-r REMOTE_DIR] ...
+Usage: ${0##*/} [-h] [ -H ] [-r AWS_REGION ] [-l LOAD_BALANCER_NAME ] ...
 -h display this help and exit
--r AWS region default=us-west-1
+-r AWS region default: us-west-1
 -H hard reboot instances
--l load balancer name default=prod-logstash
+-l load balancer name default: prod-logstash
 EOF
 }
 
@@ -42,6 +42,7 @@ done
 
 unhealthy_instances=$(aws elb describe-instance-health --load-balancer-name $load_balancer --region $region | jq '.InstanceStates[]|select (.State == "OutOfService") | .InstanceId'|tr -d '"'|tr '\n' ' ');
 
+#bail if all is good
 if [ -z "$unhealthy_instances" ]; then
     echo "No unhealthy instances found" 
     exit 0
